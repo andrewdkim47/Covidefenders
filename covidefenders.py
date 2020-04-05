@@ -28,7 +28,7 @@ def setUpDatabase(db_name):
 # TODO:
 def create_db():
     countries = read_cache(CACHE_COVID)
-    cur, conn = setUpDatabase("covid_countries.db")
+    cur, conn = setUpDatabase("covidefenders.db")
 
     setUpCountries(countries, cur, conn)
     setUpCharities(countries, cur, conn)
@@ -65,11 +65,9 @@ def create_countries():
             all_country_data.append(temp[0])
     write_cache(CACHE_COVID, all_country_data)
 
-
+# FIXME: get 20 at a time
 def setUpCountries(countries, cur, conn):
-    # Drop Table if exists
-    cur.execute("DROP TABLE IF EXISTS countries")
-    cur.execute("CREATE TABLE countries (name TEXT PRIMARY KEY, countrycode TEXT, locationid TEXT, confirmed INTEGER, deaths INTEGER, recovered INTEGER, active INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS countries (name TEXT PRIMARY KEY, countrycode TEXT, locationid TEXT, confirmed INTEGER, deaths INTEGER, recovered INTEGER, active INTEGER)")
     for c in countries:
         cur.execute("INSERT OR IGNORE INTO countries (name, countrycode, locationid, confirmed, deaths, recovered, active) \
             VALUES (?,?,?,?,?,?,?)", (c["Country"], c['CountryCode'], c['LocationID'], c['Confirmed'], c['Deaths'], c['Recovered'], c['Active']))
