@@ -6,10 +6,13 @@ import os
 def setup_db():
     #create the connection and cursor
     path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path +'/'+'covdefenders.db')
+    conn = sqlite3.connect(path +'/'+'db.db')
     cur = conn.cursor()
     return cur, conn
 
+def calculate_covid_date() {
+
+}
 
 
 def main():
@@ -18,7 +21,9 @@ def main():
     # Get the figure
     fig = plt.figure()
 
-    
+    # Create bar graph: Country to infected/death ratio
+
+    # Create bar graph: country to infected/recovered ratio.
 
     # Create Bar Line graph: X: time global affected percentages over time, and zoom stocks over time
 

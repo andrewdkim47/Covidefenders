@@ -28,7 +28,7 @@ def setUpDatabase(db_name):
 # TODO:
 def create_db():
     countries = read_cache(CACHE_COVID)
-    cur, conn = setUpDatabase("covidefenders.db")
+    cur, conn = setUpDatabase("db.db")
 
     setUpCountries(countries, cur, conn)
     setUpCharities(countries, cur, conn)
@@ -75,9 +75,25 @@ def setUpCountries(countries, cur, conn):
 
 # ---------------- CHARITY API FUNCTIONS -----------------
 
+CHARITY_URL = 'http://data.orghunter.com/v1/charitysearch'
+CACHE_CHARITY = dir_path + '/' + 'cache_countries.json'
+CHARITY_KEY = '1e879751a28c64cdf4b24a3a5137ef6f'
+
 # TODO: create a cache file for charity api stuff
 def create_charities():
-    pass
+    '''
+    try: 
+        req = requests.get(CHARITY_URL)
+        char_dict = json.loads(req.text)
+
+    except: 
+        print("ERROR: Trouble fetching charity information")
+        return None
+
+    chairty_data = []
+    for
+    '''
+    pass 
 
 # TODO:
 def setUpCharities(countries, cur, conn):
