@@ -5,10 +5,12 @@ import requests
 import sqlite3
 import time
 
-def write_cache(CACHE_FNAME,country_list):
+# write a backup jsonified cache file for when api is down
+def write_cache(CACHE_FNAME, li):
     with open(CACHE_FNAME, 'w') as outfile:
-        json.dump(country_list, outfile)
+        json.dump(li, outfile)
 
+# reads CACHE_FNAME and returns a dict from that file
 def read_cache(CACHE_FNAME):
     try:
         cache_file = open(CACHE_FNAME, 'r', encoding="utf-8")
@@ -20,16 +22,12 @@ def read_cache(CACHE_FNAME):
         CACHE_DICTION = []
     return CACHE_DICTION
 
+# Setsup sqlite3 database given file output name. Returns the new databases cursor and conn
 def setUpDatabase(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path+'/'+ db_name)
     cur = conn.cursor()
     return cur, conn
-
-# TODO:
-def create_db():
-    cur, conn = setUpDatabase("db.db")
-    create_countries(cur, conn)
 
 # -------------------- COVID API FUNCTIONS --------------
 
@@ -37,10 +35,13 @@ COVID_COUNTRIES = "https://api.covid19api.com/countries"
 dir_path = os.path.dirname(os.path.realpath(__file__))
 CACHE_COVID = dir_path + '/' + "cache_countries.json"
 
+# given country string, returns that countries url
 def get_country_url(country):
     url = "https://api.covid19api.com/live/country/" + country + "/status/confirmed"
     return url
 
+# given database cursor and conn, create countries table if not exists and call api for each country and insert corresponding information into the database.
+# Pause after every 5, and cap it at 105 entries in the database.
 def create_countries(cur, conn):
     cur.execute("CREATE TABLE IF NOT EXISTS countries (name TEXT PRIMARY KEY, countrycode TEXT, locationid TEXT, confirmed INTEGER, deaths INTEGER, recovered INTEGER, active INTEGER)")
     try:
@@ -98,7 +99,9 @@ def create_dpv_cache(symbol):
 
 
 def main():
-    create_db()
+    cur, conn = setUpDatabase("db.db")
+    create_countries(cur, conn)
+
 
 
 if __name__ == "__main__":
