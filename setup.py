@@ -3,6 +3,7 @@ import unittest
 import os
 import requests
 import sqlite3
+import time
 
 def write_cache(CACHE_FNAME,country_list):
     with open(CACHE_FNAME, 'w') as outfile:
@@ -27,10 +28,8 @@ def setUpDatabase(db_name):
 
 # TODO:
 def create_db():
-    countries = read_cache(CACHE_COVID)
     cur, conn = setUpDatabase("db.db")
-
-    setUpCountries(countries, cur, conn)
+    create_countries(cur, conn)
 
 # -------------------- COVID API FUNCTIONS --------------
 
@@ -42,7 +41,8 @@ def get_country_url(country):
     url = "https://api.covid19api.com/live/country/" + country + "/status/confirmed"
     return url
 
-def create_countries():
+def create_countries(cur, conn):
+    cur.execute("CREATE TABLE IF NOT EXISTS countries (name TEXT PRIMARY KEY, countrycode TEXT, locationid TEXT, confirmed INTEGER, deaths INTEGER, recovered INTEGER, active INTEGER)")
     try:
         r = requests.get(COVID_COUNTRIES)
         dict = json.loads(r.text)
@@ -50,36 +50,54 @@ def create_countries():
         print("TROUBLE READING COVID_COUNTRIES")
         return None
     all_country_data = []
+    count = 0
     for country_dict in dict:
-        print(country_dict['Country'])
+        # only retrieve 105 countries
+        if count == 105:
+            break
         country_url = get_country_url(country_dict['Country'])
         try:
+            print("getting country url")
             r2 = requests.get(country_url)
             temp = json.loads(r2.text)
-            print(temp)
         except:
             print("EXCEPTION WHEN GETTING COUNTRY_URL")
             return None
+        count += 1
         if temp:
-            all_country_data.append(temp[0])
-    write_cache(CACHE_COVID, all_country_data)
-
-# FIXME: get 20 at a time
-def setUpCountries(countries, cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS countries (name TEXT PRIMARY KEY, countrycode TEXT, locationid TEXT, confirmed INTEGER, deaths INTEGER, recovered INTEGER, active INTEGER)")
-    for c in countries:
-        cur.execute("INSERT OR IGNORE INTO countries (name, countrycode, locationid, confirmed, deaths, recovered, active) \
+            c = temp[0]
+            cur.execute("INSERT OR IGNORE INTO countries (name, countrycode, locationid, confirmed, deaths, recovered, active) \
             VALUES (?,?,?,?,?,?,?)", (c["Country"], c['CountryCode'], c['LocationID'], c['Confirmed'], c['Deaths'], c['Recovered'], c['Active']))
-    conn.commit()
+            conn.commit()
+            all_country_data.append(temp[0])
+        if count % 5 == 0 :
+            print('Pausing for a bit...')
+            time.sleep(5)
+    # Keep backup cache file
+    # write_cache(CACHE_COVID, all_country_data)
 
-# ---------------- STOCKS API FUNCTIONS -----------------
+# ---------------- ALPHAVANTAGE API FUNCTIONS -----------------
+
+ALPHAVANTAGE_KEY = '6XJO8EJY4VV7EE50'
+ALPHAVANTAGE_URL = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&apikey=' + ALPHAVANTAGE_KEY + '&symbol='
+
+# creates cache for specified symbol
+def create_dpv_cache(symbol):
+    try: 
+        req = requests.get(ALPHAVANTAGE_URL + symbol)
+        dpv = json.loads(req.text)        
+
+    except: 
+        print("ERROR: Trouble fetching info for symbol {}".format(symbol))
+        return None
+
+    print(dpv['Meta Data']['2. Symbol'])
+    cache_name = dir_path + '/' + symbol + '_data.json'
+    write_cache(cache_name, dpv)
 
 
 
 def main():
-    # Create json file
-    # create_countries() ONLY RUN THIS IF WE DONT HAVE CACHE_COUNTRIES
-
     create_db()
 
 
