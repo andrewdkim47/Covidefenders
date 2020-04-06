@@ -31,7 +31,7 @@ def create_db():
     cur, conn = setUpDatabase("db.db")
 
     setUpCountries(countries, cur, conn)
-    setUpCharities(countries, cur, conn)
+    #setUpCharities(countries, cur, conn)
 
 # -------------------- COVID API FUNCTIONS --------------
 
