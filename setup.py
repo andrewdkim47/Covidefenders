@@ -31,7 +31,6 @@ def create_db():
     cur, conn = setUpDatabase("db.db")
 
     setUpCountries(countries, cur, conn)
-    #setUpCharities(countries, cur, conn)
 
 # -------------------- COVID API FUNCTIONS --------------
 
@@ -73,39 +72,14 @@ def setUpCountries(countries, cur, conn):
             VALUES (?,?,?,?,?,?,?)", (c["Country"], c['CountryCode'], c['LocationID'], c['Confirmed'], c['Deaths'], c['Recovered'], c['Active']))
     conn.commit()
 
-# ---------------- CHARITY API FUNCTIONS -----------------
+# ---------------- STOCKS API FUNCTIONS -----------------
 
-CHARITY_URL = 'http://data.orghunter.com/v1/charitysearch'
-CACHE_CHARITY = dir_path + '/' + 'cache_countries.json'
-CHARITY_KEY = '1e879751a28c64cdf4b24a3a5137ef6f'
-
-# TODO: create a cache file for charity api stuff
-def create_charities():
-    '''
-    try: 
-        req = requests.get(CHARITY_URL)
-        char_dict = json.loads(req.text)
-
-    except: 
-        print("ERROR: Trouble fetching charity information")
-        return None
-
-    chairty_data = []
-    for
-    '''
-    pass 
-
-# TODO:
-def setUpCharities(countries, cur, conn):
-    # Drop Table if exists
-    cur.execute("DROP TABLE IF EXISTS charities")
-    pass
 
 
 def main():
     # Create json file
     # create_countries() ONLY RUN THIS IF WE DONT HAVE CACHE_COUNTRIES
-    # create_charities() 
+
     create_db()
 
 

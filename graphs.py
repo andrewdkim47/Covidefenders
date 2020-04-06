@@ -49,9 +49,13 @@ def calculate_covid_date(cur, fig):
     plt.xticks(rotation='vertical')
 
     fig.tight_layout(pad=3.0) # space out subplots
-    fig.savefig("covidefenders_graph.png")
-    plt.show()
+
     
+# TODO:
+def generate_zoom_slack(cur, fig):
+    # Need to use JOIN in here
+    pass
+
 
 
 def main():
@@ -61,17 +65,21 @@ def main():
     fig = plt.figure()
 
     # Create bar graph: Country to infected/death ratio
-    calculate_covid_date(cur, fig)
-
     # Create bar graph: country to infected/recovered ratio.
-
-    # Create Bar Line graph: X: time global affected percentages over time, and zoom stocks over time
-
-    # Create Bar Line graph: X: time global affected percentages over time, and zoom stocks over time
-
-    # Save the figure/
-    fig.savefig("covidefenders_graph.png")
+    calculate_covid_date(cur, fig)
+    fig.savefig("covid_graph.png")
     plt.show()
+    
+    plt.clf() # clear plt so we can start fresh
+    
+    # Create Bar Line graph: X: time global affected percentages over time, and zoom stocks over time
+    # Create Bar Line graph: X: time global affected percentages over time, and zoom stocks over time 
+    generate_zoom_slack(cur, fig)
+    fig.savefig("stocks_graph.png")
+    plt.show()
+
+    conn.close()
+
 
 if __name__ == "__main__":
     main()
