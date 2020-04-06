@@ -59,6 +59,7 @@ def generate_zoom_slack(cur, fig):
 
 
 def main():
+    plt.clf()
     cur, conn = setup_db()
     
     # Get the figure
