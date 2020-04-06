@@ -4,6 +4,7 @@ import json
 import os
 import numpy as np
 import sqlite3
+from matplotlib.ticker import FormatStrFormatter
 
 def setup_db():
     #create the connection and cursor
@@ -26,14 +27,29 @@ def calculate_covid_date(cur, fig):
             r_ratio = float(r[3]) / float(r[1])
             inf_death_ratio.append(d_ratio)
             inf_recov_ratio.append(r_ratio)
-            if len(country_list) == 10:
+            if len(country_list) == 20:
                 break
-    y_pos = np.arange(len(country_list))
-    plt.bar(y_pos, inf_death_ratio, align='center', alpha=0.5)
-    plt.xticks(y_pos, country_list)
-    plt.ylabel('Death to Cases ratio')
-    plt.title("Death to Cases Ratio for All Countres")
-    plt.savefig("covidefenders_graph.png")
+    # Death subplot
+    ax1 = fig.add_subplot(1,2,1) # 2x1 grid, first subplot
+    ax1.bar(country_list, inf_death_ratio, align='center', alpha=0.5)
+    ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ax1.set_title("Death/Cases per Country")
+    ax1.set_ylabel("Death/Cases ratio")
+    ax1.tick_params(axis='x', which='major', pad=15)
+    ax1.grid() # add background lines
+    plt.xticks(rotation='vertical')
+
+    # Recovery subplot
+    ax2 = fig.add_subplot(122) # 2x1 grid second subplot
+    ax2.bar(country_list, inf_recov_ratio, align='center', alpha=0.5)
+    ax2.set_title("Recovery/Cases per Country")
+    ax2.set_ylabel("Recovery/Cases ratio")
+    ax2.tick_params(axis='x', which='major', pad=15)
+    ax2.grid()
+    plt.xticks(rotation='vertical')
+
+    fig.tight_layout(pad=3.0) # space out subplots
+    fig.savefig("covidefenders_graph.png")
     plt.show()
     
 
