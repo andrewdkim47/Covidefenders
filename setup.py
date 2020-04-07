@@ -43,6 +43,7 @@ def get_country_url(country):
 # given database cursor and conn, create countries table if not exists and call api for each country and insert corresponding information into the database.
 # Pause after every 5, and cap it at 105 entries in the database.
 def create_countries(cur, conn):
+    cur.execute("DROP TABLE IF EXISTS countries")
     cur.execute("CREATE TABLE IF NOT EXISTS countries (name TEXT PRIMARY KEY, countrycode TEXT, locationid TEXT, confirmed INTEGER, deaths INTEGER, recovered INTEGER, active INTEGER)")
     try:
         r = requests.get(COVID_COUNTRIES)
@@ -50,28 +51,32 @@ def create_countries(cur, conn):
     except:
         print("TROUBLE READING COVID_COUNTRIES")
         return None
-    all_country_data = []
+    #all_country_data = []
     count = 0
     for country_dict in dict:
-        # only retrieve 105 countries
-        if count == 105:
+        # insert only 20 at a time
+        if count == 20:
             break
-        country_url = get_country_url(country_dict['Country'])
-        try:
-            print("getting country url")
-            r2 = requests.get(country_url)
-            temp = json.loads(r2.text)
-        except:
-            print("EXCEPTION WHEN GETTING COUNTRY_URL")
-            return None
-        count += 1
-        if temp:
-            c = temp[0]
-            cur.execute("INSERT OR IGNORE INTO countries (name, countrycode, locationid, confirmed, deaths, recovered, active) \
-            VALUES (?,?,?,?,?,?,?)", (c["Country"], c['CountryCode'], c['LocationID'], c['Confirmed'], c['Deaths'], c['Recovered'], c['Active']))
-            conn.commit()
-            all_country_data.append(temp[0])
-        if count % 5 == 0 :
+        found = cur.execute("SELECT name FROM countries WHERE name=?", (country_dict['Country'],)).fetchone()
+        if found:
+            print("hi")
+            continue
+        else:
+            country_url = get_country_url(country_dict['Country'])
+            try:
+                r2 = requests.get(country_url)
+                temp = json.loads(r2.text)
+            except:
+                print("EXCEPTION WHEN GETTING COUNTRY_URL")
+                return None
+            if temp:
+                c = temp[0]
+                cur.execute("INSERT OR IGNORE INTO countries (name, countrycode, locationid, confirmed, deaths, recovered, active) \
+                VALUES (?,?,?,?,?,?,?)", (c["Country"], c['CountryCode'], c['LocationID'], c['Confirmed'], c['Deaths'], c['Recovered'], c['Active']))
+                print("inserting country")
+                count += 1
+                conn.commit()
+        if count % 5 == 0:
             print('Pausing for a bit...')
             time.sleep(5)
     # Keep backup cache file

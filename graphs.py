@@ -56,8 +56,6 @@ def generate_zoom_slack(cur, fig):
     # Need to use JOIN in here
     pass
 
-
-
 def main():
     plt.clf()
     cur, conn = setup_db()
