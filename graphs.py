@@ -53,7 +53,10 @@ def calculate_covid_date(cur, fig):
     
 # TODO:
 def generate_zoom_slack(cur, fig):
-    # Need to use JOIN in here
+    rows_slack = cur.execute('SELECT date, open, high, low, close, volume FROM slack').fetchall()
+    rows_zoom = cur.execute('SELECT date, open, high, low, close, volume FROM zoom').fetchall()
+    
+    
     pass
 
 def main():
