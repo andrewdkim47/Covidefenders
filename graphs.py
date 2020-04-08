@@ -6,6 +6,10 @@ import numpy as np
 import sqlite3
 from matplotlib.ticker import FormatStrFormatter
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+calculations_path = dir_path + '/' + "calculations.txt"
+
+
 def setup_db():
     #create the connection and cursor
     path = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +23,9 @@ def calculate_covid_date(cur, fig):
     inf_recov_ratio = []
     country_list = []
 
+    calc_death = []
+    calc_recov = []
+
     rows = cur.execute('SELECT name, confirmed, deaths, recovered FROM countries').fetchall()
     for r in rows:
         if r[0] not in country_list:
@@ -27,8 +34,17 @@ def calculate_covid_date(cur, fig):
             r_ratio = float(r[3]) / float(r[1])
             inf_death_ratio.append(d_ratio)
             inf_recov_ratio.append(r_ratio)
+            
+            str1 = r[0] + ": " + str(inf_death_ratio[-1])
+            str2 = r[0] + ": " + str(inf_recov_ratio[-1])
+            calc_death.append(str1)
+            calc_recov.append(str2)
             if len(country_list) == 20:
                 break
+
+    write_calculations("Covid 1", calc_recov)
+    write_calculations("Covid 1", calc_death)
+
     # Death subplot
     ax1 = fig.add_subplot(1,2,1) # 2x1 grid, first subplot
     ax1.bar(country_list, inf_death_ratio, align='center', alpha=0.5)
@@ -53,11 +69,61 @@ def calculate_covid_date(cur, fig):
     
 # TODO:
 def generate_zoom_slack(cur, fig):
-    rows_slack = cur.execute('SELECT date, open, high, low, close, volume FROM slack').fetchall()
-    rows_zoom = cur.execute('SELECT date, open, high, low, close, volume FROM zoom').fetchall()
-    
-    
-    pass
+    rows = cur.execute('SELECT slack.date, slack.high, slack.low, zoom.high, zoom.low FROM slack JOIN zoom on slack.date = zoom.date').fetchall()
+    slack_percents = []
+    zoom_percents = []
+    dates = []
+
+    slack_calc = []
+    zoom_calc = []
+
+    count = 0
+    for r in rows:
+        dates.append(r[0])
+        slack_percents.append((r[1]/float(r[2])))
+        s_str = r[0] + " : " + str(slack_percents[-1])
+        slack_calc.append(s_str)
+
+        zoom_percents.append((r[3]/float(r[4])))
+        z_str = r[0] + " : " + str(zoom_percents[-1])
+        zoom_calc.append(z_str)
+        count += 1
+        if count == 20:
+            break
+
+    write_calculations("Zoom", zoom_calc)
+    write_calculations("Slack", slack_calc)
+
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.plot(dates, slack_percents, 'b-', label="Slack Stock")
+    ax1.set_title("Slack Stocks")
+    ax1.grid()
+    ax1.set_ylim(0.1, 1.5)
+    plt.xticks(rotation='vertical')
+
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.plot(dates, zoom_percents, 'y-', label="Zoom Stock")
+    ax2.set_title("Zoom Stocks")
+    ax2.grid()
+    ax2.set_ylim(0.1, 1.5)
+    plt.xticks(rotation='vertical')
+
+    fig.tight_layout(pad=3.0) # space out subplots
+
+def write_calculations(fromm, file):
+    f = open(calculations_path, "a+")
+    if fromm == "Zoom":
+        f.write("------------------Zoom stock changes over time----------------\n")
+    elif fromm == "Slack":
+        f.write("----------------Slack Stock Changes Over Time-------------\n")
+    elif fromm == "Covid 1":
+        f.write("--------------Covid Recovery Rates-----------------\n")
+    else:
+        f.write("--------------Covid Death Rates-----------------\n")
+    for line in file:
+            f.write("%s\n" %line)
+    f.close()
+
 
 def main():
     plt.clf()
