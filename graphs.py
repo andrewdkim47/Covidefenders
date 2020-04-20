@@ -15,6 +15,7 @@ def setup_db():
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path +'/'+'db.db')
     cur = conn.cursor()
+    print(len(cur.execute("SELECT * from countries").fetchall()))
     return cur, conn
 
 # (name, countrycode, locationid, confirmed, deaths, recovered, active)
