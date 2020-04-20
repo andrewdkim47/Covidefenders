@@ -43,7 +43,7 @@ def get_country_url(country):
 # given database cursor and conn, create countries table if not exists and call api for each country and insert corresponding information into the database.
 # Pause after every 5, and cap it at 105 entries in the database.
 def create_countries(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS countries (name TEXT PRIMARY KEY, countrycode TEXT, locationid TEXT, confirmed INTEGER, deaths INTEGER, recovered INTEGER, active INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS countries (name TEXT PRIMARY KEY, countrycode TEXT, confirmed INTEGER, deaths INTEGER, recovered INTEGER, active INTEGER)")
     try:
         r = requests.get(COVID_COUNTRIES)
         dict = json.loads(r.text)
@@ -70,8 +70,9 @@ def create_countries(cur, conn):
                 return None
             if temp:
                 c = temp[0]
-                cur.execute("INSERT OR IGNORE INTO countries (name, countrycode, locationid, confirmed, deaths, recovered, active) \
-                VALUES (?,?,?,?,?,?,?)", (c["Country"], c['CountryCode'], c['LocationID'], c['Confirmed'], c['Deaths'], c['Recovered'], c['Active']))
+                print(temp)
+                cur.execute("INSERT OR IGNORE INTO countries (name, countrycode, confirmed, deaths, recovered, active) \
+                VALUES (?,?,?,?,?,?)", (c["Country"], c['CountryCode'], c['Confirmed'], c['Deaths'], c['Recovered'], c['Active']))
                 print("inserting country")
                 count += 1
                 conn.commit()
@@ -144,7 +145,7 @@ def create_slack(cur,conn):
 
 def main():
     cur, conn = setUpDatabase("db.db")
-    #create_countries(cur, conn)
+    create_countries(cur, conn)
     print("Done inserting into countries")
     #cur.execute("DROP TABLE IF EXISTS zoom")
     create_zoom(cur, conn)
