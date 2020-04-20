@@ -43,7 +43,7 @@ def calculate_covid_date(cur, fig):
                 break
 
     write_calculations("Covid 1", calc_recov)
-    write_calculations("Covid 1", calc_death)
+    write_calculations("Covid 2", calc_death)
 
     # Death subplot
     ax1 = fig.add_subplot(1,2,1) # 2x1 grid, first subplot
